@@ -19,6 +19,7 @@ const worker = new Worker(
 
         console.log("Processing job : ", assignmentId)
         console.log("Job data:", data);
+        const io = getIo();
 
         try{
             console.log("Generating with AI")
@@ -35,16 +36,11 @@ const worker = new Worker(
                 status : "completed"
             })
 
-            const io = getIo();
+
             
             io.emit("assignment-ready",{
                 assignmentId
             })
-
-            io.emit("assignment-failed",{
-                assignmentId
-            })
-
 
             console.log("AI generation completed")
 
@@ -53,6 +49,10 @@ const worker = new Worker(
             await Assignment.findByIdAndUpdate(assignmentId,{
                 status : "failed"
             })
+             io.emit("assignment-failed",{
+                assignmentId
+            })
+
         }
 
     },
