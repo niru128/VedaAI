@@ -27,3 +27,20 @@ export const createAssignment = async (req : Request, res : Response)=>{
 		res.status(500).json({error : "Something went wrong"});
 	}
 }
+
+export const getAllAssignments = async (req : Request , res : Response)=>{
+	try{
+		const response = await Assignment.find().sort({createdAt : -1});
+	}catch(error){
+		console.log("Failed to get all assingments" , error);
+	}
+}
+
+export const deleteAssignment = async (req : Request , res : Response)=>{
+	try{
+		await Assignment.findByIdAndDelete(req.params.id);
+		res.json({success : true});
+	}catch(error){
+		res.status(500).json({error : "Deletion failed"});
+	}
+}
