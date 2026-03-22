@@ -3,7 +3,7 @@ import SectionBlock from "./SectionBlock";
 
 export default function AssignmentPaper({ assignment }: any) {
   return (
-    <div className="bg-white p-8 rounded-lg shadow-md border border-yellow-400">
+    <div className="bg-white p-8 rounded-lg shadow-md border border-yellow-400 h-350">
 
       {/* Header */}
       <div className="text-center">

@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Header from "@/components/layout/Header";
 import AssignmentCard from "@/components/assignment/AssignmentCard";
 import { api } from "@/lib/app";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [assignments, setAssignments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -15,45 +16,67 @@ export default function Home() {
   }, []);
 
   const fetchAssignments = async () => {
-    const res = await api.get("/assignment"); // you must create this API
-    setAssignments(res.data);
+    try {
+      const res = await api.get("/assignment");
+      setAssignments(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <div className="h-full w-full bg-linear-to-b from-[#EEEEEE] to-[#DADADA] p-6">
-      
-      <Header />
-
-      {/* Title */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-semibold">Assignments</h2>
-
-        {/* Search */}
-        <input
-          placeholder="Search Assignment"
-          className="border px-4 py-2 rounded-full w-64"
-        />
+  // 🔹 Loading UI
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-gray-500">Loading assignments...</p>
       </div>
+    );
+  }
 
-      {/* Grid */}
+  return (
+    <div className="p-6">
+
+      {/* Title + Search */}
+      {/* 🔹 Empty State */}
       {assignments.length === 0 ? (
-        <p>No assignments found</p>
+        <div className="flex flex-col items-center justify-center h-[65vh] text-center px-4">
+
+          <div className="">
+            <img src="/images/image2.png" className="h-75 w-75" />
+          </div>
+
+          <h3 className="text-xl font-semibold mb-2">
+            No assignments yet
+          </h3>
+
+          <p className="text-gray-500 mb-4 max-w-md">
+            Create your first assignment to start collecting and grading student submissions. You can set up rubrics, define marking criteria, and let AI assist with grading.
+          </p>
+
+          <button
+            onClick={() => router.push("/create")}
+            className="bg-black text-white px-6 py-2 rounded-full shadow cursor-pointer "
+          >
+            + Create Your First Assignment
+          </button>
+
+        </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4">
+       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {assignments.map((a) => (
             <AssignmentCard key={a._id} assignment={a} />
           ))}
         </div>
       )}
 
-      {/* Floating Button */}
       <button
-        onClick={() => router.push("/create")}
-        className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-black text-white px-6 py-3 rounded-full shadow-lg"
-      >
-        + Create Assignment
-      </button>
-
+      onClick={() => router.push("/create")}
+      className="fixed bottom-24 right-6 h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center md:hidden z-50"
+    >
+      +
+    </button>
     </div>
   );
 }

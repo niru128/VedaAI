@@ -5,12 +5,14 @@ import QuestionRow from "./QuestionRow";
 import FileUpload from "./FileUpload";
 import { api } from "@/lib/app";
 import { useRouter } from "next/navigation";
+import { CalendarDays, Mic } from "lucide-react";
+import BottomNav from "../ui/Button";
 
 export default function AssignmentForm() {
   const router = useRouter();
 
   const [rows, setRows] = useState([{ type: "MCQ", count: 2, marks: 1 }]);
-  const [loading , setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [instructions, setInstructions] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -38,7 +40,6 @@ export default function AssignmentForm() {
 
   // Submit
   const handleSubmit = async () => {
-    setLoading(true);
     if (rows.length === 0) {
       alert("Add at least one question type");
       return;
@@ -56,74 +57,137 @@ export default function AssignmentForm() {
       return;
     }
 
-    const res = await api.post("/assignment/create", {
-      questionTypes: rows,
-      instructions,
-      dueDate,
-    });
+    try {
+      setLoading(true);
 
-    router.push(`/assignment/${res.data.assignmentId}`);
-    setLoading(false);
+      const res = await api.post("/assignment/create", {
+        questionTypes: rows,
+        instructions,
+        dueDate,
+      });
+
+      router.push(`/assignment/${res.data.assignmentId}`);
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-md max-w-3xl mx-auto">
-      <h2 className="text-lg font-semibold mb-4">Assignment Details</h2>
+    <div className="flex flex-col w-full justify-start px-4 md:px-8">
+      <div className="flex gap-3 items-center mb-4">
+  <div className="w-3 h-3 rounded-full bg-green-500"></div>
 
-      {/* File Upload */}
-      <FileUpload />
+  <div className="flex flex-col">
+    <p className="font-semibold text-lg md:text-xl">
+      Create Assignment
+    </p>
+    <p className="text-gray-500 text-sm">
+      Set up a new assignment for your students
+    </p>
+  </div>
+</div>
+      <div className="bg-white/80 rounded-2xl mt-8 border border-gray-200">
+        <div className="w-full max-w-4xl mx-auto flex flex-col p-8 space-y-4">
+          <div className="h-12.5 w-70 flex flex-col space-y-1">
+            <p className="font-bricolage font-semibold text-[16px] leading-[1.4] tracking-[-0.04em]">
+              Assignment Details
+            </p>
+            <p className="font-bricolage text-[16px] leading-[1.4] tracking-[-0.04em]">
+              Basic information about your assignment
+            </p>
+          </div>
+          <div className="mt-8 flex flex-col items-center justify-center gap-2">
+            <FileUpload />
+            <div className="font-bricolage text-[16px] leading-[1.4] tracking-[-0.04em]">
+              Upload image of your preferred documents/images
+            </div>
+          </div>
 
-      {/* Due Date */}
-      <input
-        type="date"
-        value={dueDate}
-        onChange={(e) => setDueDate(e.target.value)}
-        className="border p-2 mt-4 w-full rounded"
-      />
+          <div className="flex flex-col mt-4">
+            <p className="font-semibold text-[16px]">Due Date</p>
 
-      {/* Question Rows */}
-      <div className="mt-4">
-        <h3 className="font-medium">Question Types</h3>
+            <div className="mt-2 flex items-center justify-between border border-gray-300 bg-gray-50 rounded-xl px-4 h-12">
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="w-full bg-transparent outline-none text-gray-700 appearance-none"
+              />
 
-        {rows.map((row, i) => (
-          <QuestionRow
-            key={i}
-            row={row}
-            index={i}
-            updateRow={updateRow}
-            removeRow={removeRow}
-          />
-        ))}
+              <CalendarDays className="h-5 w-5 text-gray-500" />
+            </div>
+          </div>
 
-        <button onClick={addRow} className="mt-3 text-blue-500">
-          + Add Question Type
-        </button>
+          <div className="mt-6 space-y-4">
+            {/* Header Row */}
+            <div className="grid grid-cols-12 text-sm font-medium text-black px-2">
+              <p className="col-span-6 font-semibold">Question Type</p>
+              <p className="col-span-3 text-center font-semibold">
+                No. of Questions
+              </p>
+              <p className="col-span-3 text-center font-semibold">Marks</p>
+            </div>
+
+            {/* Rows */}
+            {rows.map((row, i) => (
+              <QuestionRow
+                key={i}
+                row={row}
+                index={i}
+                updateRow={updateRow}
+                removeRow={removeRow}
+              />
+            ))}
+
+            {/* Add Button */}
+            <button
+              onClick={addRow}
+              className="flex items-center gap-2 mt-4 text-gray-700 hover:text-black font-semibold"
+            >
+              <div className="h-8 w-8 rounded-full bg-black text-white flex items-center justify-center">
+                +
+              </div>
+              Add Question Type
+            </button>
+
+            {/* Totals */}
+            <div className="flex justify-end text-sm text-gray-600 mt-4">
+              <div className="text-right font-bold">
+                <p>Total Questions: {totalQuestions}</p>
+                <p>Total Marks: {totalMarks}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Submit */}
+          <div className="mt-6">
+            <p className="font-semibold text-[16px] mb-2">
+              Additional Information (For better output)
+            </p>
+
+            <div className="flex items-end justify-between bg-gray-100 rounded-2xl px-4 py-4">
+              <textarea
+                placeholder="e.g Generate a question paper for 3 hour exam duration..."
+                value={instructions}
+                onChange={(e) => setInstructions(e.target.value)}
+                className="w-full bg-transparent outline-none resize-none text-gray-700 placeholder:text-gray-400"
+                rows={3}
+              />
+
+              {/* Mic Icon */}
+              <button className="ml-3 h-10 w-10 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-gray-200 transition">
+                <Mic className="h-5 w-5 text-gray-600" />
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-
-      {/* Totals */}
-      <div className="mt-4 text-sm text-gray-600">
-        <p>Total Questions: {totalQuestions}</p>
-        <p>Total Marks: {totalMarks}</p>
+      <div className="sticky bottom-0 bg-white pt-4 pb-2 w-full sm: mb-2">
+        <BottomNav onNext={handleSubmit} />
       </div>
-
-      {/* Instructions */}
-      <textarea
-        placeholder="Additional instructions..."
-        value={instructions}
-        onChange={(e) => setInstructions(e.target.value)}
-        className="border p-2 mt-4 w-full rounded"
-      />
-
-      {/* Submit */}
-      <button
-        disabled={loading}
-        className="mt-6 bg-black text-white px-6 py-2 rounded flex items-center gap-2"
-      >
-        {loading && (
-          <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-        )}
-        {loading ? "Generating..." : "Generate Assignment"}
-      </button>
     </div>
   );
 }

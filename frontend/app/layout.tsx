@@ -1,7 +1,13 @@
-import Sidebar from "@/components/layout/Sidebar";
-import "./globals.css"
+"use client"
 
-export default function RootLayout({children} : any){
+import Sidebar from "@/components/layout/Sidebar";
+import "./globals.css";
+import Header from "@/components/layout/Header";
+import MobileNav from "@/components/ui/MobileNav";
+import { useState } from "react";
+
+export default function RootLayout({ children }: any) {
+  const [isOpen , setIsOpen] = useState(false);
   return (
     <html>
       <head>
@@ -10,11 +16,24 @@ export default function RootLayout({children} : any){
           rel="stylesheet"
         />
       </head>
-      <body className="flex bg-gray-50">
-        
+      <body className="flex h-screen bg-[#F5F5F5] gap-2 p-4">
         <Sidebar />
-        <div className="flex-1 p-6">{children}</div>
+
+        {isOpen && (
+          <div
+            className="fixed inset-0 bg-black/30 z-40 md:hidden"
+            onClick={() => setIsOpen(false)}
+          />
+        )}
+
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header onToggleSidebar = {() => setIsOpen(true)} />
+
+          <main className="flex-1 p-4 md:p-6 overflow-y-auto">{children}</main>
+        </div>
+
+        <MobileNav />
       </body>
     </html>
-  )
+  );
 }

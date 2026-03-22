@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import {Worker} from "bullmq";
+import { Worker } from "bullmq";
 import Assignment from "../models/assignment.model";
 import { redis } from "../config/redis";
 import { buildPrompt } from "../utils/promptBuilder";
@@ -7,56 +7,54 @@ import { generateQuestions } from "../services/ai.service";
 import { parseAIResponse } from "../utils/parser";
 import { connectDB } from "../config/db";
 import { getIo } from "../sockets/socket";
+import mongoose from "mongoose";
 
 dotenv.config();
 
 connectDB();
 
 const worker = new Worker(
-    "assignmentQueue",
-    async(job)=>{
-        const { assignmentId, data } = job.data;
+  "assignmentQueue",
+  async (job) => {
+    const { assignmentId, data } = job.data;
 
-        console.log("Processing job : ", assignmentId)
-        console.log("Job data:", data);
-        const io = getIo();
+    console.log("Processing job : ", assignmentId);
+    console.log("Job data:", data);
+    // const io = getIo();
 
-        try{
-            console.log("Generating with AI")
+    try {
+      const prompt = await buildPrompt(data);
+      const rawResponse = await generateQuestions(prompt);
 
-            const prompt = await buildPrompt(data);
+      const parsed = parseAIResponse(rawResponse || "");
 
-            const rawResponse = await generateQuestions(prompt);
+      console.log("Parsed : ", parsed)
 
+      if (!parsed.sections || parsed.sections.length === 0) {
+  throw new Error("Invalid parsed data");
+}
 
-            const parsed = parseAIResponse(rawResponse || "");
+      const updated = await Assignment.findByIdAndUpdate(
+  assignmentId,
+  {
+    sections: parsed.sections,
+    status: "completed"
+  },
+  { returnDocument: "after" }
+);
 
-            await Assignment.findByIdAndUpdate(assignmentId,{
-                sections : parsed.sections,
-                status : "completed"
-            })
+console.log("UPDATED DOC:", updated);
 
+      console.log("AI generation completed");
+    } catch (error) {
+      console.log("Worker error:", error);
 
-            
-            io.emit("assignment-ready",{
-                assignmentId
-            })
-
-            console.log("AI generation completed")
-
-        }catch(error){
-            console.log(error);
-            await Assignment.findByIdAndUpdate(assignmentId,{
-                status : "failed"
-            })
-             io.emit("assignment-failed",{
-                assignmentId
-            })
-
-        }
-
-    },
-    {
-        connection : redis
+      await Assignment.findByIdAndUpdate(assignmentId, {
+        status: "failed",
+      });
     }
-)
+  },
+  {
+    connection: redis,
+  },
+);

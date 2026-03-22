@@ -4,38 +4,38 @@ import { useEffect, useState } from "react";
 import { socket } from "@/lib/socket";
 import { api } from "@/lib/app";
 import AssignmentPaper from "@/components/assignment/AssignmentPaper";
+import { useParams } from "next/navigation";
 
-export default function AssignmentPage({ params }: any) {
+export default function AssignmentPage() {
   const [assignment, setAssignment] = useState<any>(null);
   const [error, setError] = useState(false);
+  const params = useParams();
 
   useEffect(() => {
-    const handleReady = async (data: any) => {
-      if (data.assignmentId === params.id) {
-        const res = await api.get(`/assignment/${params.id}`);
+  if (!params?.id) return;
+
+  const interval = setInterval(async () => {
+    try {
+      const res = await api.get(`/assignment/${params.id}`);
+      console.log("API RESPONSE:", res.data);
+
+      if (res.data?.status === "completed") {
         setAssignment(res.data);
+        clearInterval(interval); // ✅ stop polling
       }
-    };
+    } catch (err) {
+      console.log(err);
+    }
+  }, 2000); // every 2 seconds
 
-    const handleFail = () => {
-      setError(true);
-    };
-
-    socket.on("assignment-ready", handleReady);
-    socket.on("assignment-failed", handleFail);
-
-    return () => {
-      socket.off("assignment-ready", handleReady);
-      socket.off("assignment-failed", handleFail);
-    };
-  }, []);
-
+  return () => clearInterval(interval);
+}, [params.id]);
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 bg-gray-100">
       {/* Banner */}
-      <div className="bg-black text-white p-4 rounded-lg mb-6 flex justify-between">
-        <p>AI has generated your question paper successfully.</p>
-        <button className="bg-white text-black px-3 py-1 rounded">
+      <div className="bg-black text-white p-4 rounded-xl mb-6 flex flex-col space-y-2 h-25">
+        <p>Certainly, Lakshya! Here are customized Question Paper for your CBSE Grade 8 Science classes on the NCERT chapters:</p>
+        <button className="bg-white text-black px-3 py-1 rounded-full w-50">
           Download PDF
         </button>
       </div>

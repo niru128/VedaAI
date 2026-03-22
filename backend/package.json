@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node dist/server.js",
     "build": "tsc",
-    "dev": "tsx watch src/server.ts"
+    "dev": "tsx watch src/server.ts",
+    "worker": "tsx watch src/queues/worker.ts"
   },
   "keywords": [],
   "author": "",
@@ -21,11 +22,13 @@
     "mongoose": "^9.3.1",
     "node-fetch": "^3.3.2",
     "openai": "^6.32.0",
+    "pdfkit": "^0.18.0",
     "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^25.5.0",
+    "@types/pdfkit": "^0.17.5",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"

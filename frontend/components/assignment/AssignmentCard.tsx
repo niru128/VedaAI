@@ -24,21 +24,21 @@ export default function AssignmentCard({ assignment }: any) {
 };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 relative">
+    <div className="bg-white rounded-xl shadow-sm p-4 relative w-100 h-40 flex flex-col justify-between">
       
       {/* Top Row */}
       <div className="flex justify-between items-center">
-        <h3 className="font-semibold text-gray-800">
+        <h3 className="font-bold text-gray-800 text-[20px]">
           {assignment.title || "Quiz on Electricity"}
         </h3>
 
         {/* 3 dots */}
-        <button onClick={() => setOpen(!open)}>⋮</button>
+        <button onClick={() => setOpen(!open)} className="hover:cursor-pointer">⋮</button>
       </div>
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-4 top-10 bg-white shadow-md rounded-lg p-2 w-36 z-10">
+        <div className="absolute right-4 top-10 bg-white shadow-xl w-40 h-25 rounded-lg p-2  z-10">
           <p
             onClick={() => router.push(`/assignment/${assignment._id}`)}
             className="cursor-pointer hover:bg-gray-100 p-2 rounded"
