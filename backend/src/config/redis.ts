@@ -1,15 +1,8 @@
 import Redis from "ioredis";
 
-const redis = new Redis(process.env.REDIS_URL as string, {
-  tls: {}, // required for Upstash
-});
-
-redis.on("connect", () => {
-  console.log("✅ Redis connected");
-});
-
-redis.on("error", (err) => {
-  console.error("❌ Redis error:", err);
-});
+const redis = new Redis(
+  process.env.REDIS_URL || "redis://127.0.0.1:6379",
+  process.env.REDIS_URL ? { tls: {} } : {}
+);
 
 export default redis;
