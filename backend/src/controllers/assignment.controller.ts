@@ -1,5 +1,5 @@
-import Assignment from "../models/assignment.model";
-import { assignmentQueue } from "../queues/assignment.queue";
+import Assignment from "../models/assignment.model.js";
+import { assignmentQueue } from "../queues/assignment.queue.js";
 import { Request, Response } from "express";
 import PDFDocument from "pdfkit";
 

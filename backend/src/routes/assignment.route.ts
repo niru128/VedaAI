@@ -1,5 +1,5 @@
 import express from "express";
-import { createAssignment, deleteAssignment, downloadPdf, getAllAssignments, getAssignmentById } from "../controllers/assignment.controller";
+import { createAssignment, deleteAssignment, downloadPdf, getAllAssignments, getAssignmentById } from "../controllers/assignment.controller.js";
 
 
 const router = express.Router();
